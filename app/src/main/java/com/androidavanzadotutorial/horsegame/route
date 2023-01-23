@@ -1,0 +1,27 @@
+1- Mejoramos las funcionalidades existentes - QUE FUNCIONE
+2- Mejoramos la UX de las funcionalidades existentes
+3- Añadimos nuevas funcionalidades.
+
+ERRORES
+- redimensionado del tablero
+- quitar la actionbar
+-
+
+MEJORAS DE UX
+- un color para el punto actual, y otro para el rastro
+-
+-
+-
+-
+
+FUNCIONALIDADES
+- poder mover el caballo (comprobando el moviemiento en L)
+- pintar niveles y limpiarlos
+- control de movimientos
+- control de opciones
+- control de tiempo
+- control de vidas
+- mostrar publicidad
+- permitir pagar para ser premium
+- habilitar accesos de premium a mas niveles y deshabilitar publicidad
+- opcion de compartir resultado

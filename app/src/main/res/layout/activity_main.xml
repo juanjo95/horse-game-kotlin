@@ -249,8 +249,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="43dp"
-                            android:background="@color/white_cell"
-                            android:src="@drawable/horse"/>
+                            android:background="@color/white_cell"/>
                         <ImageView
                             android:id="@+id/c17"
                             android:layout_width="0dp"

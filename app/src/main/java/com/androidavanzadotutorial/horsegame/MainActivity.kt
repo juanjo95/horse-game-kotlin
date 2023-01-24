@@ -1,5 +1,6 @@
 package com.androidavanzadotutorial.horsegame
 
+import android.content.Context
 import android.graphics.Point
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,13 +9,19 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableRow
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
+
+    private var cellSelected_x = 0
+    private var cellSelected_y = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         initScreenGame()
+        setFirstPosition()
     }
 
     private fun initScreenGame(){
@@ -50,4 +57,30 @@ class MainActivity : AppCompatActivity() {
         lyMessage.visibility = View.INVISIBLE
     }
 
+    private fun setFirstPosition(){
+        var x = 0
+        var y = 0
+        x = (0..7).random()
+        y = (0..7).random()
+
+        this.cellSelected_x = x
+        this.cellSelected_y = y
+
+        selectCell(x,y)
+    }
+
+    private fun selectCell(x:Int,y:Int){
+        pintHorseCell(this.cellSelected_x,this.cellSelected_y,"previus_cell")
+
+        this.cellSelected_x = x
+        this.cellSelected_y = y
+
+        pintHorseCell(x,y,"selected_cell")
+    }
+
+    private fun pintHorseCell(x:Int,y:Int,color:String){
+        var iv:ImageView = findViewById(resources.getIdentifier("c$x$y","id",packageName))
+        iv.setBackgroundColor(ContextCompat.getColor(this, resources.getIdentifier(color,"color",packageName)))
+        iv.setImageResource(R.drawable.horse)
+    }
 }

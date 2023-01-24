@@ -3,8 +3,8 @@
 3- Añadimos nuevas funcionalidades.
 
 ERRORES
-- redimensionado del tablero
-- quitar la actionbar
+- redimensionado del tablero ✔
+- quitar la actionbar ✔
 -
 
 MEJORAS DE UX
@@ -15,6 +15,7 @@ MEJORAS DE UX
 -
 
 FUNCIONALIDADES
+- inicio aleatorio
 - poder mover el caballo (comprobando el moviemiento en L)
 - pintar niveles y limpiarlos
 - control de movimientos

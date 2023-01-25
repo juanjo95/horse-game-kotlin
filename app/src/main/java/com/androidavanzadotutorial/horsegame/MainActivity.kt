@@ -16,11 +16,14 @@ class MainActivity : AppCompatActivity() {
     private var cellSelected_x = 0
     private var cellSelected_y = 0
 
+    private lateinit var board:Array<IntArray>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         initScreenGame()
+        resetBoard()
         setFirstPosition()
     }
 
@@ -70,6 +73,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun selectCell(x:Int,y:Int){
+
+        this.board[x][y] = 1
         pintHorseCell(this.cellSelected_x,this.cellSelected_y,"previus_cell")
 
         this.cellSelected_x = x
@@ -82,5 +87,24 @@ class MainActivity : AppCompatActivity() {
         var iv:ImageView = findViewById(resources.getIdentifier("c$x$y","id",packageName))
         iv.setBackgroundColor(ContextCompat.getColor(this, resources.getIdentifier(color,"color",packageName)))
         iv.setImageResource(R.drawable.horse)
+    }
+
+    private fun resetBoard(){
+        /**
+         * 0 esta libre
+         * 1 casilla marcada
+         * 2 es un bonus
+         * 9 es una opcion del movimiento actual
+         */
+        this.board = arrayOf(
+            intArrayOf(0,0,0,0,0,0,0,0),
+            intArrayOf(0,0,0,0,0,0,0,0),
+            intArrayOf(0,0,0,0,0,0,0,0),
+            intArrayOf(0,0,0,0,0,0,0,0),
+            intArrayOf(0,0,0,0,0,0,0,0),
+            intArrayOf(0,0,0,0,0,0,0,0),
+            intArrayOf(0,0,0,0,0,0,0,0),
+            intArrayOf(0,0,0,0,0,0,0,0)
+        )
     }
 }

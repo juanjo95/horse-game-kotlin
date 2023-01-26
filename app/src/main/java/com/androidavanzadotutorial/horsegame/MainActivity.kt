@@ -9,12 +9,17 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableRow
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
     private var cellSelected_x = 0
     private var cellSelected_y = 0
+
+    private var options = 0
+    private var nameColorBlack = "black_cell"
+    private var nameColorWhite = "white_cell"
 
     private lateinit var board:Array<IntArray>
 
@@ -75,15 +80,42 @@ class MainActivity : AppCompatActivity() {
     private fun selectCell(x:Int,y:Int){
 
         this.board[x][y] = 1
-        pintHorseCell(this.cellSelected_x,this.cellSelected_y,"previus_cell")
+        paintHorseCell(this.cellSelected_x,this.cellSelected_y,"previus_cell")
 
         this.cellSelected_x = x
         this.cellSelected_y = y
 
-        pintHorseCell(x,y,"selected_cell")
+        this.clearOptions()
+
+        paintHorseCell(x,y,"selected_cell")
+        this.checkOption(x,y)
     }
 
-    private fun pintHorseCell(x:Int,y:Int,color:String){
+    private fun clearOptions(){
+        for (i in 0..7){
+            for (j in 0..7){
+                if(this.board[i][j] == 9 || this.board[i][j] == 2){
+                    if(this.board[i][j] == 9) this.board[i][j] = 0
+                    this.clearOption(i,j)
+                }
+            }
+        }
+    }
+
+    private fun clearOption(x:Int,y:Int){
+        var iv:ImageView = findViewById(resources.getIdentifier("c$x$y","id",packageName))
+        if(this.checkColorCell(x,y).equals("black")){
+            iv.setBackgroundColor(ContextCompat.getColor(this,resources.getIdentifier(nameColorBlack,"color",packageName)))
+        }else{
+            iv.setBackgroundColor(ContextCompat.getColor(this,resources.getIdentifier(nameColorWhite,"color",packageName)))
+        }
+
+        if(this.board[x][y] == 1){
+            iv.setBackgroundColor(ContextCompat.getColor(this,resources.getIdentifier("previus_cell","color",packageName)))
+        }
+    }
+
+    private fun paintHorseCell(x:Int,y:Int,color:String){
         var iv:ImageView = findViewById(resources.getIdentifier("c$x$y","id",packageName))
         iv.setBackgroundColor(ContextCompat.getColor(this, resources.getIdentifier(color,"color",packageName)))
         iv.setImageResource(R.drawable.horse)
@@ -134,4 +166,53 @@ class MainActivity : AppCompatActivity() {
 
         if(checkTrue) this.selectCell(x,y)
     }
+
+    private fun checkOption(x:Int, y:Int){
+        this.options = 0
+
+        this.checkMove(x,y,1,2)   // check move right - top long
+        this.checkMove(x,y,2,1)   // check move right long - top
+        this.checkMove(x,y,1,-2)  // check move right - bottom long
+        this.checkMove(x,y,2,-1)  // check move right long - bottom
+        this.checkMove(x,y,-1,2)  // check move left - top long
+        this.checkMove(x,y,-2,1)  // check move left long - top
+        this.checkMove(x,y,-1,-2) // check move left - bottom long
+        this.checkMove(x,y,-2,-1) // check move left long - bottom
+
+        var tvOptionsData:TextView = findViewById(R.id.tvOptionsData)
+        tvOptionsData.text = options.toString()
+    }
+
+    private fun checkMove(x:Int, y: Int, mov_x:Int, mov_y:Int){
+        var option_x = x + mov_x
+        var option_y = y + mov_y
+
+        if(option_x < 8 && option_y < 8 && option_x >= 0 && option_y >= 0){
+            if(this.board[option_x][option_y] == 0 || this.board[option_x][option_y] == 2){
+                this.options++
+                this.paintOptions(option_x,option_y)
+                this.board[option_x][option_y] = 9
+            }
+        }
+    }
+
+    private fun paintOptions(x:Int, y:Int){
+        var iv:ImageView = findViewById(resources.getIdentifier("c$x$y","id",packageName))
+        if(this.checkColorCell(x,y).equals("black")) iv.setBackgroundResource(R.drawable.option_black)
+        else iv.setBackgroundResource(R.drawable.option_white)
+    }
+
+    private fun checkColorCell(x:Int, y:Int):String{
+        var color = ""
+        var blackColumn_x = arrayOf(0,2,4,6)
+        var blackRow_x = arrayOf(1,3,5,7)
+
+        if(blackColumn_x.contains(x) && blackColumn_x.contains(y) || blackRow_x.contains(x) && blackRow_x.contains(y)){
+            color = "black"
+        }else{
+            color = "white"
+        }
+        return color
+    }
+
 }

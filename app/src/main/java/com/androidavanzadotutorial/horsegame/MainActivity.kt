@@ -17,7 +17,10 @@ class MainActivity : AppCompatActivity() {
     private var cellSelected_x = 0
     private var cellSelected_y = 0
 
+    private var movesRequired = 4
+    private var moves = 64
     private var options = 0
+
     private var nameColorBlack = "black_cell"
     private var nameColorWhite = "white_cell"
 
@@ -79,6 +82,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun selectCell(x:Int,y:Int){
 
+        this.moves--
+        var tvMovesData:TextView = findViewById(R.id.tvMovesData)
+        tvMovesData.text = moves.toString()
+
         this.board[x][y] = 1
         paintHorseCell(this.cellSelected_x,this.cellSelected_y,"previus_cell")
 
@@ -89,6 +96,36 @@ class MainActivity : AppCompatActivity() {
 
         paintHorseCell(x,y,"selected_cell")
         this.checkOption(x,y)
+
+        if(this.moves > 0){
+            this.checkNewBonus()
+            //this.checkGameOver(x,y)
+        }else{
+            //this.checkSuccessfulEnd()
+        }
+    }
+
+    private fun checkNewBonus(){
+        if(this.moves % this.movesRequired == 0){
+            var bonusCell_x = 0
+            var bonusCell_y = 0
+            var bonusCell = false
+
+            while (bonusCell == false){
+                bonusCell_x = (0..7 ).random()
+                bonusCell_y = (0..7 ).random()
+                if(this.board[bonusCell_x][bonusCell_y] == 0){
+                    bonusCell = true
+                }
+            }
+            this.board[bonusCell_x][bonusCell_y] = 2
+            this.paintBonusCell(bonusCell_x,bonusCell_y)
+        }
+    }
+
+    private fun paintBonusCell(x:Int, y:Int){
+        var iv:ImageView = findViewById(resources.getIdentifier("c$x$y","id",packageName))
+        iv.setImageResource(R.drawable.bonus)
     }
 
     private fun clearOptions(){

@@ -208,17 +208,19 @@
                         android:gravity="center"
                         android:orientation="horizontal"
                         android:translationY="-8dp">
+
                         <TextView
                             android:id="@+id/tvOptionsData"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_width="47dp"
+                            android:layout_height="match_parent"
                             android:background="@drawable/bg_data_bottom"
                             android:fontFamily="@font/amaranth_bold"
                             android:paddingBottom="10dp"
                             android:text="0"
                             android:textAlignment="center"
                             android:textColor="@color/app_color_light"
-                            android:textSize="18sp"/>
+                            android:textSize="18sp" />
+
                         <TextView
                             android:id="@+id/tvBonusData"
                             android:layout_width="match_parent"
@@ -227,7 +229,7 @@
                             android:paddingBottom="10dp"
                             android:text=""
                             android:textColor="@color/app_color_light"
-                            android:textSize="18sp"/>
+                            android:textSize="18sp" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

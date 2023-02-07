@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Point
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
@@ -14,12 +15,15 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
+    private var width_bonus = 0
     private var cellSelected_x = 0
     private var cellSelected_y = 0
 
+    private var levelMoves = 64
     private var movesRequired = 4
     private var moves = 64
     private var options = 0
+    private var bonus = 0
 
     private var nameColorBlack = "black_cell"
     private var nameColorWhite = "white_cell"
@@ -52,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         var lateralMarginDP = 0
         val width_cell = (width_dp - lateralMarginDP) / 8
         val height_cell = width_cell
+
+        this.width_bonus = 2 * width_cell.toInt()
 
         for(i in 0..7){
             for(j in 0..7){
@@ -86,6 +92,14 @@ class MainActivity : AppCompatActivity() {
         var tvMovesData:TextView = findViewById(R.id.tvMovesData)
         tvMovesData.text = moves.toString()
 
+        this.growProgressBonus()
+
+        if(this.board[x][y] == 2){
+            this.bonus++
+            var tvBonusData:TextView = findViewById(R.id.tvBonusData)
+            tvBonusData.text = "+ ${this.bonus}"
+        }
+
         this.board[x][y] = 1
         paintHorseCell(this.cellSelected_x,this.cellSelected_y,"previus_cell")
 
@@ -103,6 +117,20 @@ class MainActivity : AppCompatActivity() {
         }else{
             //this.checkSuccessfulEnd()
         }
+    }
+
+    private fun growProgressBonus(){
+        var v:View = findViewById(R.id.vNewBonus)
+        var moves_done = this.levelMoves - this.moves
+        var bonus_done = moves_done /this.movesRequired
+        var moves_rest = this.movesRequired * (bonus_done)
+        var bonus_grow = moves_done - moves_rest
+
+        var widthBonus = ((this.width_bonus/this.movesRequired) * bonus_grow).toFloat()
+
+        var height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,8f,getResources().getDisplayMetrics()).toInt()
+        var width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,widthBonus,getResources().getDisplayMetrics()).toInt()
+        v.setLayoutParams(TableRow.LayoutParams(width,height))
     }
 
     private fun checkNewBonus(){
@@ -228,7 +256,7 @@ class MainActivity : AppCompatActivity() {
             if(this.board[option_x][option_y] == 0 || this.board[option_x][option_y] == 2){
                 this.options++
                 this.paintOptions(option_x,option_y)
-                this.board[option_x][option_y] = 9
+                if(this.board[option_x][option_y] == 0) this.board[option_x][option_y] = 9
             }
         }
     }

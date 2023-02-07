@@ -113,10 +113,41 @@ class MainActivity : AppCompatActivity() {
 
         if(this.moves > 0){
             this.checkNewBonus()
-            //this.checkGameOver(x,y)
+            this.checkGameOver(x,y)
         }else{
-            //this.checkSuccessfulEnd()
+            this.showMessage("You Win!!","Next Level",false)
         }
+    }
+
+    private fun checkGameOver(x:Int,y:Int){
+        if(this.options == 0){
+            if(this.bonus == 0){
+                this.showMessage("Game over","Try Again!",true)
+            }
+        }
+    }
+
+    private fun showMessage(title:String, action:String, gameOver:Boolean){
+        var lyMessage:LinearLayout = findViewById(R.id.lyMessage)
+        lyMessage.visibility = View.VISIBLE
+
+        var tvTitleMessage: TextView = findViewById(R.id.tvTitleMessage)
+        tvTitleMessage.text = title
+
+        var score:String = ""
+        var tvTimeData: TextView = findViewById(R.id.tvTimeData)
+        if(gameOver){
+            score = "Score: "+(this.levelMoves-this.moves)+"/"+this.levelMoves
+        }else{
+            score = tvTimeData.text.toString()
+        }
+
+        var tvScoreMessage: TextView = findViewById(R.id.tvScoreMessage)
+        tvScoreMessage.text = score
+
+        var tvAction: TextView = findViewById(R.id.tvAction)
+        tvAction.text = action
+
     }
 
     private fun growProgressBonus(){

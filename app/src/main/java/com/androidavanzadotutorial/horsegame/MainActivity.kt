@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Point
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
@@ -12,9 +14,13 @@ import android.widget.LinearLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
+    private var mHandler:Handler? = null //Tiempo
+    private var timeInSeconds:Long = 0
+    private var gaming = true
     private var width_bonus = 0
     private var cellSelected_x = 0
     private var cellSelected_y = 0
@@ -36,8 +42,75 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         this.initScreenGame()
+        this.startGame()
+    }
+
+    private fun startGame(){
+        this.gaming = true
         this.resetBoard()
+        this.clearBoard()
         this.setFirstPosition()
+        this.resetTime()
+        this.startTime()
+    }
+
+    private fun clearBoard(){
+        var iv:ImageView
+
+        var colorBlack = ContextCompat.getColor(this, resources.getIdentifier(nameColorBlack,"color",packageName))
+        var colorWhite = ContextCompat.getColor(this, resources.getIdentifier(nameColorWhite,"color",packageName))
+
+        for(i in 0..7){
+            for(j in 0..7){
+                iv = findViewById(resources.getIdentifier("c$i$j","id",packageName))
+                //iv.setImageResource(R.drawable.horse)
+                iv.setImageResource(0)
+                if(this.checkColorCell(i,j) == "black") iv.setBackgroundColor(colorBlack)
+                else iv.setBackgroundColor(colorWhite)
+            }
+        }
+
+    }
+
+    private var chronometer:Runnable = object :Runnable{
+        override fun run() {
+            try {
+                if(gaming){
+                    timeInSeconds++
+                    updateStopWatchView(timeInSeconds)
+                }
+            }finally {
+                mHandler!!.postDelayed(this,1000L)
+            }
+        }
+    }
+
+    private fun updateStopWatchView(timeInSeconds:Long){
+        val formattedTime:String = this.getFormattedStopWatch((timeInSeconds * 1000))
+        var tvTimeData:TextView = findViewById(R.id.tvTimeData)
+        tvTimeData.text = formattedTime
+    }
+
+    private fun getFormattedStopWatch(ms:Long):String{
+        var milliseconds = ms
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds)
+        milliseconds-= TimeUnit.MINUTES.toMillis(minutes)
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds)
+
+        return "${if (minutes < 10) "0" else ""}$minutes:" + "${if (seconds < 10) "0" else ""}$seconds"
+    }
+
+    private fun resetTime(){
+        this.mHandler?.removeCallbacks(this.chronometer)
+        this.timeInSeconds = 0
+
+        var tvTimeData:TextView = findViewById(R.id.tvTimeData)
+        tvTimeData.text = "00:00"
+    }
+
+    private fun startTime(){
+        this.mHandler = Handler(Looper.getMainLooper())
+        this.chronometer.run()
     }
 
     private fun initScreenGame(){
@@ -142,6 +215,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showMessage(title:String, action:String, gameOver:Boolean){
+        this.gaming = false
         var lyMessage:LinearLayout = findViewById(R.id.lyMessage)
         lyMessage.visibility = View.VISIBLE
 

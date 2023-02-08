@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private var moves = 64
     private var options = 0
     private var bonus = 0
+    private var checkMovement = true
 
     private var nameColorBlack = "black_cell"
     private var nameColorWhite = "white_cell"
@@ -109,20 +110,33 @@ class MainActivity : AppCompatActivity() {
         this.clearOptions()
 
         paintHorseCell(x,y,"selected_cell")
+        this.checkMovement = true
         this.checkOption(x,y)
 
         if(this.moves > 0){
             this.checkNewBonus()
-            this.checkGameOver(x,y)
+            this.checkGameOver()
         }else{
             this.showMessage("You Win!!","Next Level",false)
         }
     }
 
-    private fun checkGameOver(x:Int,y:Int){
+    private fun checkGameOver(){
         if(this.options == 0){
-            if(this.bonus == 0){
+            if(this.bonus > 0){
+                this.checkMovement = false
+                this.paintAllOptions()
+            }else{
                 this.showMessage("Game over","Try Again!",true)
+            }
+        }
+    }
+
+    private fun paintAllOptions(){
+        for (i in 0..7){
+            for(j in 0..7){
+                if(this.board[i][j] != 1) this.paintOption(i,j)
+                if(this.board[i][j] == 0) this.board[i][j] = 9
             }
         }
     }
@@ -245,18 +259,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkCell(x:Int, y:Int){
-        var dif_x = x - this.cellSelected_x
-        var dif_y = y - this.cellSelected_y
 
-        var checkTrue = false
-        if(dif_x == 1 && dif_y == 2)   checkTrue = true // right - top long
-        if(dif_x == 1 && dif_y == -2)  checkTrue = true // right - bottom long
-        if(dif_x == 2 && dif_y == 1)   checkTrue = true // right long - top
-        if(dif_x == 2 && dif_y == -1)  checkTrue = true // right long - bottom
-        if(dif_x == -1 && dif_y == 2)  checkTrue = true // left - top long
-        if(dif_x == -1 && dif_y == -2) checkTrue = true // left - bottom long
-        if(dif_x == -2 && dif_y == 1)  checkTrue = true // left long - top
-        if(dif_x == -2 && dif_y == -1) checkTrue = true // left long - bottom
+        var checkTrue = true
+        if(this.checkMovement){
+            var dif_x = x - this.cellSelected_x
+            var dif_y = y - this.cellSelected_y
+
+            checkTrue = false
+            if(dif_x == 1 && dif_y == 2)   checkTrue = true // right - top long
+            if(dif_x == 1 && dif_y == -2)  checkTrue = true // right - bottom long
+            if(dif_x == 2 && dif_y == 1)   checkTrue = true // right long - top
+            if(dif_x == 2 && dif_y == -1)  checkTrue = true // right long - bottom
+            if(dif_x == -1 && dif_y == 2)  checkTrue = true // left - top long
+            if(dif_x == -1 && dif_y == -2) checkTrue = true // left - bottom long
+            if(dif_x == -2 && dif_y == 1)  checkTrue = true // left long - top
+            if(dif_x == -2 && dif_y == -1) checkTrue = true // left long - bottom
+        }else{
+            if(this.board[x][y] != 1){
+                this.bonus--
+            }
+        }
 
         if(this.board[x][y] == 1) checkTrue = false
 
@@ -286,13 +308,13 @@ class MainActivity : AppCompatActivity() {
         if(option_x < 8 && option_y < 8 && option_x >= 0 && option_y >= 0){
             if(this.board[option_x][option_y] == 0 || this.board[option_x][option_y] == 2){
                 this.options++
-                this.paintOptions(option_x,option_y)
+                this.paintOption(option_x,option_y)
                 if(this.board[option_x][option_y] == 0) this.board[option_x][option_y] = 9
             }
         }
     }
 
-    private fun paintOptions(x:Int, y:Int){
+    private fun paintOption(x:Int, y:Int){
         var iv:ImageView = findViewById(resources.getIdentifier("c$x$y","id",packageName))
         if(this.checkColorCell(x,y).equals("black")) iv.setBackgroundResource(R.drawable.option_black)
         else iv.setBackgroundResource(R.drawable.option_white)

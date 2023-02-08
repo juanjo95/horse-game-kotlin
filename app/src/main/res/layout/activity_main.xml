@@ -127,7 +127,7 @@
                         android:fontFamily="@font/amaranth_regular"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:text="@string/moves"
+                        android:text="@string/time"
                         android:textAlignment="center"
                         android:textColor="@color/app_color_light"
                         android:textSize="18sp"/>
@@ -138,7 +138,7 @@
                         android:background="@drawable/bg_data_bottom"
                         android:fontFamily="@font/amaranth_bold"
                         android:paddingBottom="10dp"
-                        android:text="0"
+                        android:text="00:00"
                         android:textAlignment="center"
                         android:textColor="@color/app_color_light"
                         android:textSize="18sp"/>
@@ -159,7 +159,7 @@
                         android:fontFamily="@font/amaranth_regular"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:text="@string/moves"
+                        android:text="@string/lives"
                         android:textAlignment="center"
                         android:textColor="@color/app_color_light"
                         android:textSize="18sp"/>

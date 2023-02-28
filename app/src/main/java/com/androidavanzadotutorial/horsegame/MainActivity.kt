@@ -1,11 +1,18 @@
 package com.androidavanzadotutorial.horsegame
 
+import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Point
+import android.media.MediaScannerConnection
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
@@ -13,21 +20,35 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableRow
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.concurrent.TimeUnit
+import java.util.jar.Manifest
 
 class MainActivity : AppCompatActivity() {
 
+    private var bitmap:Bitmap ?= null
     private var mHandler:Handler? = null //Tiempo
     private var timeInSeconds:Long = 0
     private var gaming = true
     private var width_bonus = 0
     private var cellSelected_x = 0
     private var cellSelected_y = 0
+    private var string_share = ""
+    private var level = 1
+    private var lives = 1
 
-    private var levelMoves = 64
-    private var movesRequired = 4
-    private var moves = 64
+    private var score_lives = 1
+    private var scoreLevel = 1
+
+    private var nextLevel = false
+    private var levelMoves = 0
+    private var movesRequired = 0
+    private var moves = 0
     private var options = 0
     private var bonus = 0
     private var checkMovement = true
@@ -46,12 +67,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startGame(){
-        this.gaming = true
+
+        this.setLevel()
+        this.setLevelParameters()
+
         this.resetBoard()
         this.clearBoard()
+
+        this.setBoardLevel()
         this.setFirstPosition()
+
         this.resetTime()
         this.startTime()
+        this.gaming = true
     }
 
     private fun clearBoard(){
@@ -115,7 +143,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initScreenGame(){
         setSizeBoard()
-        hide_message()
+        hide_message(false)
     }
 
     private fun setSizeBoard(){
@@ -143,21 +171,65 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun hide_message(){
+    private fun hide_message(start:Boolean){
         var lyMessage:LinearLayout = findViewById(R.id.lyMessage)
         lyMessage.visibility = View.INVISIBLE
+
+        if(start) this.startGame()
     }
 
     private fun setFirstPosition(){
         var x = 0
         var y = 0
-        x = (0..7).random()
-        y = (0..7).random()
+
+        var firstPosition = false
+
+        while (firstPosition == false){
+            x = (0..7).random()
+            y = (0..7).random()
+            if(this.board[x][y] == 1) firstPosition = true
+            this.checkOption(x,y)
+            if(this.options == 0) firstPosition = false
+        }
+
 
         this.cellSelected_x = x
         this.cellSelected_y = y
 
         selectCell(x,y)
+    }
+
+    private fun setLevel(){
+        if(this.nextLevel){
+            this.level++
+        }else{
+            this.lives--
+            if(this.lives < 1){
+                this.level = 1
+                this.lives = 1
+            }
+        }
+    }
+
+    private fun setLevelParameters(){
+        var tvLiveData:TextView = findViewById(R.id.tvLiveData)
+        tvLiveData.text = this.lives.toString()
+
+        this.score_lives = this.lives
+
+        var tvLevelNumber:TextView = findViewById(R.id.tvLevelNumber)
+        tvLevelNumber.text = this.level.toString()
+        this.scoreLevel = this.level
+
+        this.bonus = 0
+        var tvBonusData:TextView = findViewById(R.id.tvBonusData)
+        tvBonusData.text = ""
+
+        this.setLevelMoves()
+        this.moves = this.levelMoves
+
+        this.movesRequired = this.setMovesRequired()
+
     }
 
     private fun selectCell(x:Int,y:Int){
@@ -216,6 +288,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun showMessage(title:String, action:String, gameOver:Boolean){
         this.gaming = false
+        this.nextLevel = !gameOver
+
         var lyMessage:LinearLayout = findViewById(R.id.lyMessage)
         lyMessage.visibility = View.VISIBLE
 
@@ -226,8 +300,10 @@ class MainActivity : AppCompatActivity() {
         var tvTimeData: TextView = findViewById(R.id.tvTimeData)
         if(gameOver){
             score = "Score: "+(this.levelMoves-this.moves)+"/"+this.levelMoves
+            string_share = "This game makes me sick !!! " + score
         }else{
             score = tvTimeData.text.toString()
+            string_share = "Let's go!!! New challenge completed. Level: $level (" + score + ")"
         }
 
         var tvScoreMessage: TextView = findViewById(R.id.tvScoreMessage)
@@ -250,6 +326,69 @@ class MainActivity : AppCompatActivity() {
         var height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,8f,getResources().getDisplayMetrics()).toInt()
         var width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,widthBonus,getResources().getDisplayMetrics()).toInt()
         v.setLayoutParams(TableRow.LayoutParams(width,height))
+    }
+
+    private fun setLevelMoves(){
+        when(this.level){
+            1->this.levelMoves = 64
+            2->this.levelMoves = 56
+            3->this.levelMoves = 32
+            4->this.levelMoves = 16
+            5->this.levelMoves = 48
+        }
+    }
+
+    private fun setMovesRequired():Int{
+        var movesRequired = 0
+
+        when(this.level){
+            1->movesRequired = 8
+            2->movesRequired = 10
+            3->movesRequired = 12
+            4->movesRequired = 10
+            5->movesRequired = 10
+        }
+        return movesRequired
+    }
+
+    private fun paint_column(column:Int){
+        for(i in 0..7){
+            this.board[column][i] = 1
+            this.paintHorseCell(column,i,"previus_cell")
+        }
+    }
+
+    private fun paintLevel_2(){
+        this.paint_column(6)
+    }
+    private fun paintLevel_3(){
+        for(i in 0..7){
+            for(j in 4..7){
+                this.board[j][i] = 1
+                this.paintHorseCell(j,i,"previus_cell")
+            }
+        }
+    }
+    private fun paintLevel_4(){
+        this.paintLevel_3()
+        this.paintLevel_5()
+    }
+    private fun paintLevel_5(){
+        for(i in 0..3){
+            for(j in 0..3){
+                this.board[j][i] = 1
+                this.paintHorseCell(j,i,"previus_cell")
+            }
+        }
+    }
+
+    private fun setBoardLevel(){
+        when(this.level){
+            2->this.paintLevel_2()
+            3->this.paintLevel_3()
+            4->this.paintLevel_4()
+            5->this.paintLevel_5()
+        }
     }
 
     private fun checkNewBonus(){
@@ -407,4 +546,85 @@ class MainActivity : AppCompatActivity() {
         return color
     }
 
+    private fun launchAction(v:View){
+        this.hide_message(true)
+    }
+
+    private fun launchShareGame(v:View){
+        this.shareGame(v)
+    }
+
+    private fun shareGame(view:View){
+        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+
+        //var ssc:ScreenCapture = capture(this)
+        //this.bitmap = ssc.getBitmap()
+
+        /*var screenView:View = view.getRootView();
+        screenView.setDrawingCacheEnabled(true);
+        this.bitmap = Bitmap.createBitmap(screenView.getDrawingCache());
+        screenView.setDrawingCacheEnabled(false);*/
+
+        view.setDrawingCacheEnabled(true);
+        this.bitmap = Bitmap.createBitmap(view.getDrawingCache());
+
+        if(this.bitmap != null){
+            var idGame = SimpleDateFormat("yyyy/MM/dd").format(Date())
+            idGame = idGame.replace(":","")
+            idGame = idGame.replace("/","")
+
+            val path = saveImage(this.bitmap,"${idGame}.jpg")
+            val bmpUri = Uri.parse(path)
+
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            shareIntent.putExtra(Intent.EXTRA_STREAM, bmpUri)
+            shareIntent.putExtra(Intent.EXTRA_TEXT, string_share)
+            shareIntent.type = "image/png"
+
+            val finalShareIntent = Intent.createChooser(shareIntent, "Select the app you want to share the game to")
+            finalShareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            this.startActivity(finalShareIntent)
+
+        }
+    }
+
+    private fun saveImage(bitmap: Bitmap?, fileName: String):String? {
+        if(bitmap == null){
+            return null
+        }
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q){
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME,fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE,"image/jpeg")
+                put(MediaStore.MediaColumns.RELATIVE_PATH,Environment.DIRECTORY_PICTURES + "/Screenshots")
+            }
+            val uri = this.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues)
+            if(uri != null){
+                this.contentResolver.openOutputStream(uri).use {
+                    if(it == null) return@use
+                    bitmap.compress(Bitmap.CompressFormat.PNG,85,it)
+                    it.flush()
+                    it.close()
+                    MediaScannerConnection.scanFile(this,arrayOf(uri.toString()),null,null)
+                }
+            }
+            return uri.toString()
+        }
+        val filePath = Environment.getExternalStoragePublicDirectory (
+            Environment.DIRECTORY_PICTURES + "/Screenshots"
+        ).absolutePath
+        val dir = File(filePath)
+        if(!dir.exists()) dir.mkdirs()
+        val file = File(dir,fileName)
+        val fOut = FileOutputStream(file)
+
+        bitmap.compress(Bitmap.CompressFormat.PNG,85,fOut)
+        fOut.flush()
+        fOut.close()
+
+        MediaScannerConnection.scanFile(this,arrayOf(file.toString()),null,null)
+        return filePath
+    }
 }
